@@ -3,7 +3,7 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   xmlns:components="components.*"
-					   title="4Shared Downloader 1.0.0" fontFamily="Malgun Gothic" showStatusBar="false"
+					   title="4Shared Downloader 1.1.0" fontFamily="Malgun Gothic" showStatusBar="false"
 					   addedToStage="init()">
 		
 	<fx:Style>
@@ -30,6 +30,7 @@
 			import events.DownloadEvent;
 			
 			import mx.controls.Alert;
+			import mx.events.CloseEvent;
 			
 			private static const SEARCH_BASE_URL : String = "http://search.4shared.com/q/SEARCH_OPTION/PAGE/music/";
 			private static const NEW_LINE_PATTERN : String = "(\r|\n)";
@@ -285,6 +286,14 @@
 			 */
 			private function onBrowseButtonClick( e : MouseEvent ) : void
 			{
+				browseForDownloadDirectory();
+			}
+			
+			/**
+			 * 다운로드 위치를 선택하는 다이얼로그를 띄운다.
+			 */
+			private function browseForDownloadDirectory() : void
+			{
 				var file : File = new File;
 				file.browseForDirectory( "다운로드 위치 선택" );
 				file.addEventListener( Event.SELECT, onDownloadDirectorySelect );
@@ -298,7 +307,7 @@
 				var file : File = e.target as File;
 				file.removeEventListener( Event.SELECT, onDownloadDirectorySelect );
 				var path : String = file.nativePath;
-				Setting.setSetting( Setting.DOWNLOAD_PATH, path );
+				Setting.setSetting( SettingKeys.DOWNLOAD_PATH, path );
 				file = null;
 				updateDownloadPathInput();
 			}
@@ -308,8 +317,17 @@
 			 */
 			private function updateDownloadPathInput() : void
 			{
-				var path : String = Setting.getSetting( Setting.DOWNLOAD_PATH ) as String;
+				var path : String = Setting.getSetting( SettingKeys.DOWNLOAD_PATH ) as String;
 				if( path ) downloadPathInput.text = path;
+				else Alert.show( "다운로드 위치를 지정하세요.", "", 4, null, onDownloadPathAlertClose );
+			}
+			
+			/**
+			 * "다운로드 위치를 지정하세요." 알림창이 닫힐 때 실행되는 메서드.
+			 */
+			private function onDownloadPathAlertClose( e : CloseEvent ) : void
+			{
+				browseForDownloadDirectory();
 			}
 			
 			/**

@@ -3,9 +3,7 @@ package
 	import flash.net.SharedObject;
 
 	public class Setting
-	{
-		public static const DOWNLOAD_PATH : String = "downloadPath";
-		
+	{	
 		private static var _sharedObj : SharedObject;
 		
 		public function Setting()
@@ -15,7 +13,7 @@ package
 		
 		private static function instantiate() : void
 		{
-			_sharedObj = SharedObject.getLocal( "MathNote" );
+			_sharedObj = SharedObject.getLocal( "4SharedDownloader" );
 		}
 		
 		public static function getSetting( key : String ) : Object
