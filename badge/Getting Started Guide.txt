@@ -1,0 +1,209 @@
+﻿================================================================================
+Adobe AIR Badge Installer Sample Getting Started Guide V2 (8/06/2008)
+================================================================================
+
+This guide will give you an overview of using the AIRInstallBadge SDK to customize and deploy an installer badge for your AIR application. The badge is "LABS QUALITY", so you may discover bugs. Please report any bugs. You can report bugs at http://www.adobe.com/go/wish/ or on the Adobe AIR forums.
+
+
+Please also see the code comments in AIRInstallBadge.html and AIRInstallBadge.as for more information.
+
+
+================================================================================
+Changes since 2/25/08 Badge
+================================================================================
+
+1. Removed all logic to handle beta3 applications and runtimes.
+2. Made this badge compatible with Badger for AIR.
+
+================================================================================
+Features and Capabilities
+================================================================================
+1. Leverages SWFObject to upgrade end-user to supported Flash Player version (Version: 9,0,115,0). Developers can disable this feature. See details below.
+
+  FP detection:
+    * If no FP installed, text and FP download center links are displayed to end-user. End user must install the Flash Player manually
+    * If unsupported FP version is installed (FP 7, FP 8, or pre FP 9,0,115,0) , end-user prompted to upgrade the Flash Player inline via the Express Install feature. Upon successful upgrade the install badge is displayed.
+
+2. Logic to handle Beta3 applications have been removed in this version of the badge
+
+
+3. Includes capabilities to detect and launch ("launch now") installed applications. Note: Application must have opted-in to be detected and launched. Pleas see Adobe AIR documentation for details on how to make your application detectable.
+
+4. Provides customizable "help" text and links. This allows end users who encounter problems installing the application to get more information
+
+5. Customizable text display
+
+
+
+
+PLEASE SEE FOLLOWING SECTIONS FOR DETAILS.
+
+================================================================================
+Files
+================================================================================
+
+There are 10 files in the AIRInstallBadge SDK:
+
+AIRInstallBadge.as - ActionScript 3 class file containing all of the badge installation logic. Used as the document class for AIRInstallBadge.fla
+
+AIRInstallBadge.fla - an Adobe Flash CS3 FLA containing the user interface and transitions.
+
+AIRInstallBadge.swf - the badge swf that will be embedded in your HTML.
+
+DemoImage.jpg - sample application image.
+
+EmbedDemo.html - sample HTML file demonstrating how to embed the badge into your page, and showing all available parameters.
+
+expressinstall.swf - SWF required by SWFObject to carry out an express install of the Flash Player.
+
+Getting Started Guide.txt - this guide.
+
+SDK License.txt - the license for this SDK.
+
+swfobject.js - the SWFObject JavaScript file.
+
+AdobeAIR_SDK License.pdf -Adobe AIR SDK License Agreement (for reference)
+
+
+
+================================================================================
+Deployment
+================================================================================
+
+IMPORTANT: You must customize some aspects of the badge prior to deploying it. Please see Customization below.
+
+1. Copy the embed code from the EmbedDemo.html file and paste it into your HTML document in the desired location. Make sure that you also copy the swfobject script tag from the head of the HTML.
+
+2. Customize the embed code as per the Customization section below.
+
+3. Upload your HTML file, together with the following files to your server:
+	- AIRInstallBadge.swf
+	- swfobject.js
+	- expressinstall.swf (if you plan to use express install)
+
+4. Ensure that your application ".air" file is at the absolute URL specified by the "appurl" parameter, and that your image (if desired) is at the URL specified by the "imageurl" parameter.
+
+5. Test to ensure the badge functions as expected.
+
+
+
+================================================================================
+Customization
+================================================================================
+
+IMPORTANT: You must customize some aspects of the badge prior to deploying it.
+
+There are two ways to customize the badge: edit the AIRInstallBadge.fla and AIRInstallBadge.fla file, or by setting parameters in your embed code. The former requires Adobe Flash CS3 is beyond the scope of this document, but the ActionScript code has been commented to make modifying it more straightforward. This section will focus on customizing the badge with parameters, which you can do with any HTML or text editor.
+
+You can set any parameter using the following syntax in your embed code:
+so.addVariable("parametername", "value");
+
+
+--------------------------------------------------------------------------------
+The following parameters are required to deploy a badge, omitting them will result in an error message.
+--------------------------------------------------------------------------------
+
+airversion - the version string for the AIR Runtime that is required to install and run your application (ex. AIR Beta 3 is "1.0.M6", AIR 1.0 is "1.0").
+
+appname - the name of your application. This will be displayed in the help dialog, and in place of your application image if it is not specified or fails to load.
+
+appurl - the absolute path to your ".air" application file (ex. http://www.adobe.com/sample.air)
+
+--------------------------------------------------------------------------------
+The following parameters are required if you'd like to allow users to launch your application from the badge if it is already installed.
+IMPORTANT: Your application must have <allowBrowserInvocation> set to true in the descriptor file for launching or upgrading to work.
+--------------------------------------------------------------------------------
+
+appid - the unique id that you gave your application in the descriptor file (ex. com.adobe.air.MyApplication)
+
+pubid - your publisher ID. This is a hexadecimal string based on your certificate that is generated by the AIR runtime when an application is installed. This can be accessed either through the AIR API, or by locating the publisherid file that is created during installation (see additional resources below to find more information on this topic).
+
+--------------------------------------------------------------------------------
+The following parameters are optional.
+--------------------------------------------------------------------------------
+
+appversion - the version of your application that will be installed by the badge. This is required to support upgrading from the badge. This should be the same as the version set in your AIR application descriptor file. While the version comparison logic is quite robust, it is recommended that you use the standard "1.2.3" version syntax if possible.
+
+imageurl - the URL of the application image to display. This can be relative (to the embed HTML) or absolute. The appname will be displayed instead if this is omitted or the image cannot be loaded.
+
+appinstallarg - the value of this parameter will be passed to your AIR application if it is launched during installation in the arguments property of the BrowserInvokeEvent.
+
+applauncharg - the value of this parameter will be passed to your AIR application if it is launched from the badge in the arguments property of the BrowserInvokeEvent.
+
+helpurl - a URL for the user to get additional help on installing your application. This can be relative (to the embed HTML) or absolute. If specified, a link will be shown below the default text pointing to this URL.
+
+hidehelp - hides the help (?) icon if set to "true".
+
+skiptransition - skips the transition when the image loads if set to "true".
+
+titlecolor - sets the color of all dialog titles. Accepts any of the following formats: FF0033, 0xFF0033, #FF0033.
+
+buttonlabelcolor - sets the color of all button labels. Accepts any of the following formats: FF0033, 0xFF0033, #FF0033.
+
+appnamecolor - sets the color of the application name when it is displayed in lieu of an application image.
+
+--------------------------------------------------------------------------------
+The following parameters change the default text in the badge. These are optional.
+--------------------------------------------------------------------------------
+
+str_error - title for error dialogs. Default is "Error!".
+
+str_err_params - error message if all required parameters are not defined. Default is "Invalid installer parameters.".
+
+str_err_airunavailable - error message if the AIR Runtime is not available for the user's system. Default is "Adobe® AIR™ is not available for your system.".
+
+str_err_airswf - error message if the AIR Browser API swf could not be loaded. Default is "Unable to load the Adobe® AIR™ Browser API swf.".
+
+str_loading - button label while the AIR Browser API swf is loading. Default is "Loading...".
+
+str_install - button label for install. Default is "Install Now".
+
+str_launch - button label for launch. Default is "Launch Now".
+
+str_upgrade - button label for upgrade. Default is "Upgrade Now".
+
+str_close - button label for closing dialogs. Default is "Close".
+
+str_launching - title for dialog displayed while launching the AIR application. Default is "Launching Application".
+
+str_launchingtext - dialog content displayed while launching the AIR application. Default is "Please wait while the application launches.".
+
+str_installing - title for dialog displayed while installing the AIR application. Default is "Installing Application".
+
+str_installingtext - dialog content displayed while installing the AIR application. Default is "Please wait while the application installs.".
+
+str_tryagain - button label that displays 15 seconds after attempting an install or upgrade if the latest version of the application is not detected to be installed. Default is "Try Again".
+
+str_help - title for help dialog. Default is "Help".
+
+str_helptext - title for error dialogs. Default is dynamically generated depending on the badge state, please see AIRInstallBadge.getHelpText() for details.
+
+--------------------------------------------------------------------------------
+Note that you can also customize the SWFObject settings. For instance, you can enable Express Install by adding the following to your embed code (this is set by default in the DemoEmbed.html file):
+
+so.useExpressInstall('expressinstall.swf');
+
+This will allow any version of Flash Player 6.0.65 or greater to painlessly install Flash Player 9.0.115, which is required for the badge to run correctly.
+
+Please see additional resources below for more information on customizing SWFObject.
+
+
+
+================================================================================
+Additional Resources
+================================================================================
+
+Adobe AIR documentation:
+http://www.adobe.com/support/documentation/en/air/
+
+Adobe AIR dev guide for Flash:
+http://livedocs.adobe.com/air/1/devappsflash/
+
+Adobe AIR dev guides for HTML and Ajax:
+http://livedocs.adobe.com/air/1/devappshtml/
+
+SWFObject documentation:
+http://blog.deconcept.com/swfobject/
+
+Adobe Developer Center
+http://www.adobe.com/devnet/air/

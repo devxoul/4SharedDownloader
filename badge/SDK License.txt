@@ -1,0 +1,18 @@
+ADOBE SYSTEMS INCORPORATED
+Copyright © 2008 Adobe Systems Incorporated. All Rights Reserved.
+ 
+NOTICE:  This software code file is provided by Adobe as a Sample
+under the terms of the Adobe AIR SDK license agreement.  Adobe permits
+you to use, modify, and distribute this file only in accordance with
+the terms of that agreement.  You may have received this file from a
+source other than Adobe.  Nonetheless, you may use, modify, and/or
+distribute this file only in accordance with the Adobe AIR SDK license
+agreement. 
+ 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

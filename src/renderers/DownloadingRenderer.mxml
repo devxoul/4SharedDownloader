@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				xmlns:components="components.*"
+				autoDrawBackground="false" currentState="{data.currentState}"
+				render="onRender( event )">
+	<s:layout>
+		<s:VerticalLayout paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" gap="2" />
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import components.DownloadList;
+			
+			import events.DownloadEvent;
+			
+			import mx.controls.List;
+			import mx.core.UIComponent;
+			
+			private function onCancelButtonClick( e : MouseEvent ) : void
+			{
+				dispatchDownloadEvent( DownloadEvent.CANCEL );
+			}
+			
+			private function onRestartButtonClick( e : MouseEvent ) : void
+			{
+				dispatchDownloadEvent( DownloadEvent.RESTART );
+			}
+			
+			private function onRemoveFromListButtonClick( e : MouseEvent ) : void
+			{
+				dispatchDownloadEvent( DownloadEvent.REMOVE_FROM_LIST );
+			}
+			
+			private function onRemoveFromDiskButtonClick( e : MouseEvent ) : void
+			{
+				dispatchDownloadEvent( DownloadEvent.REMOVE_FROM_DISK );
+			}
+			
+			private function dispatchDownloadEvent( type : String ) : void
+			{
+				var downloadEvent : DownloadEvent = new DownloadEvent( type );
+				downloadEvent.index = data.index;
+				DownloadList( parentDocument.parent ).dispatchEvent( downloadEvent );
+			}
+			
+			private function onRender( e : Event ) : void
+			{
+				if( !data.bytesLoaded || !data.bytesTotal ) return;
+				if( data.bytesLoaded >= data.bytesTotal )
+					currentState = "finish";
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="download" />
+		<s:State name="cancel" />
+		<s:State name="finish" />
+	</s:states>
+	
+	<s:Label text="{data.title}" fontWeight="bold" />
+	
+	<s:Label text.download="{int( data.bytesLoaded / 1024 )} KB / {int( data.bytesTotal / 1024 )} KB ({int( data.bytesLoaded / data.bytesTotal * 100 )}%)"
+			 text.cancel="취소됨" text.finish="완료" color="0x999999" />
+	
+	<s:HGroup paddingTop="-2">
+		<components:LabelButton includeIn="download" text="취소" click="onCancelButtonClick( event )" />
+		<components:LabelButton includeIn="cancel" text="다시시작" click="onRestartButtonClick( event )" />
+		<components:LabelButton includeIn="cancel, finish" text="목록에서 제거" click="onRemoveFromListButtonClick( event )" />
+		<components:LabelButton includeIn="cancel, finish" text="디스크에서 제거" click="onRemoveFromDiskButtonClick( event )" />
+	</s:HGroup>
+</s:ItemRenderer>
