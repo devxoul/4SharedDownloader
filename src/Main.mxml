@@ -3,7 +3,7 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   xmlns:components="components.*"
-					   title="4Shared Downloader 1.1.0" fontFamily="Malgun Gothic" showStatusBar="false"
+					   title="4Shared Downloader v1.0.1" fontFamily="Malgun Gothic" showStatusBar="false"
 					   addedToStage="init()">
 		
 	<fx:Style>
@@ -31,6 +31,9 @@
 			
 			import mx.controls.Alert;
 			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.events.TextOperationEvent;
 			
 			private static const SEARCH_BASE_URL : String = "http://search.4shared.com/q/SEARCH_OPTION/PAGE/music/";
 			private static const NEW_LINE_PATTERN : String = "(\r|\n)";
@@ -45,7 +48,15 @@
 			private var _searchLoader : URLLoader;
 			private var _linkLoader : URLLoader;
 			
+			/**
+			 * 현재 검색어
+			 */
+			private var _searchWord : String;
+			
 			private var _numResults : int;
+			
+			[Bindable]
+			private var currentPage : int = 1;
 			
 			[Bindable]
 			private var numPages : int;
@@ -60,7 +71,7 @@
 			private var downloadings : ArrayList;
 			
 			[Bindable]
-			private var searchContainerWidth : Number = 250;
+			private var searchContainerWidth : Number = 270;
 			
 			private var _appUpdater : ApplicationUpdaterUI;
 			
@@ -104,30 +115,60 @@
 			
 			private function onAppUpdaterError( e : ErrorEvent ) : void
 			{
-				trace( e.toString() );
+				trace( "ApplicationUpdaterUI 에러랑께!!", e.toString() );
 			}
 			
 			/**
-			 * 검색어로 검색한다.
-			 * @param page 검색할 페이지.
+			 * 검색창에서 엔터키를 입력할 때 실행되는 메서드.
 			 */
-			private function search( page : int = 1 ) : void
+			private function onSearchWordInputEnter( e : FlexEvent ) : void
 			{
-				searchWordInput.appendText( SEPERATOR );
-				searchWordInput.text = searchWordInput.text.split( SEPERATOR ).join( "" );
-				searchWordInput.selectRange( searchWordInput.text.length, searchWordInput.text.length );
-				
+				setSearchWord();
+				search( _searchWord, 1 );				
+			}
+			
+			/**
+			 * 검색 버튼을 클릭할 때 실행되는 메서드.
+			 */
+			private function onSearchButtonClick( e : MouseEvent ) : void
+			{
+				setSearchWord();
+				search( _searchWord, 1 );
+			}
+			
+			/**
+			 * _searchWord를 searchWordInput.text에서 한글 잘림 방지를 한 문자열로 설정한다.
+			 */
+			private function setSearchWord() : void
+			{
 				if( searchWordInput.text == "" )
 				{
 					Alert.show( "검색어를 입력해주세요." );
 					return;
 				}
 				
+				searchWordInput.appendText( SEPERATOR );
+				searchWordInput.text = searchWordInput.text.split( SEPERATOR ).join( "" );
+				searchWordInput.selectRange( searchWordInput.text.length, searchWordInput.text.length );
+				_searchWord = searchWordInput.text;
+			}
+			
+			/**
+			 * 검색어로 검색한다.
+			 * @param page 검색할 페이지.
+			 */
+			private function search( searchWord : String = null, page : int = 1 ) : void
+			{
+				if( !searchWord ) searchWord = _searchWord;
+				else _searchWord = searchWord;
+				
 				startBusy();
 				
-				var url : String = SEARCH_BASE_URL.split( "SEARCH_OPTION" ).join( searchOptionList.selectedItem.value ).split( "PAGE" ).join( ( page - 1 ) * 10 ) + encodeURI( searchWordInput.text );
-				trace( url );
+				var url : String = SEARCH_BASE_URL.split( "SEARCH_OPTION" ).join( searchOptionList.selectedItem.value ).split( "PAGE" ).join( ( page - 1 ) * 10 ) + encodeURI( _searchWord );
+				trace( "검색 url은???", url );
 				_searchLoader.load( new URLRequest( url ) );
+				
+				currentPage = page;
 			}
 			
 			/**
@@ -140,7 +181,7 @@
 				
 				stopBusy();
 				
-				trace( searchResultList.numChildren );
+				trace( "searchResultList에 자식이 몇개??", searchResultList.numChildren );
 			}
 			
 			/**
@@ -331,12 +372,42 @@
 			}
 			
 			/**
-			 * 페이지 Nummeric Stepper가 변경될 때 실행되는 메서드.
+			 * 이전 페이지 버튼을 클릭할 때 실행되는 메서드.
 			 */
-			private function onPageChange( e : Event ) : void
+			private function onPrevPageButtonClick( e : MouseEvent ) : void
 			{
-				search( pageStepper.value );
-				trace( numPages );
+				if( !searchResults.length ) return;
+				if( currentPage == 1 ) return;
+				search( null, --currentPage );
+			}
+			
+			/**
+			 * 페이지 인풋이 바뀔 때 실행되는 메서드.
+			 */
+			private function onPageInputEnter( e : FlexEvent ) : void
+			{
+				if( !searchResults.length ) return;
+				
+				var inputPage : int = int( pageInput.text );
+				if( 1 <= inputPage && inputPage <= numPages )
+				{
+					search( null, currentPage = inputPage );
+				}
+				else
+				{
+					pageInput.text = String( currentPage );
+					pageInput.selectAll();
+				}
+			}
+			
+			/**
+			 * 다음 페이지 버튼을 클릭할 때 실행되는 메서드.
+			 */
+			private function onNextPageButtonClick( e : MouseEvent ) : void
+			{
+				if( !searchResults.length ) return;
+				if( currentPage == numPages ) return;
+				search( null, ++currentPage );
 			}
 			
 			private function startBusy() : void
@@ -432,11 +503,12 @@
 		</s:layout>
 		
 		<s:HGroup width="100%" height="100%">
+			<!-- 왼쪽 -->
 			<s:VGroup width="{searchContainerWidth}" height="100%">
 				<!-- 검색 -->
 				<s:HGroup width="100%">
-					<s:TextInput id="searchWordInput" width="100%" enter="search()" />
-					<s:Button label="검색" width="50" click="search()" />
+					<s:TextInput id="searchWordInput" width="100%" enter="onSearchWordInputEnter( event )" />
+					<s:Button label="검색" width="50" click="onSearchButtonClick( event )" />
 				</s:HGroup>
 				
 				<s:HGroup width="100%" verticalAlign="middle">
@@ -461,12 +533,12 @@
 											 itemRenderer="renderers.SearchResultRenderer" dataProvider="{searchResults}"
 											 start="onSearchResultItemListDoubleClick( event )" />
 				
-				<s:HGroup width="100%" verticalAlign="middle">
-					<s:Label text="페이지 :" />
-					<s:NumericStepper id="pageStepper" minimum="1" maximum="{numPages}" change="onPageChange( event )" />
+				<s:HGroup width="100%" height="30" verticalAlign="middle">
+					<s:Button label=">" scaleX="-1" width="30" height="30" cornerRadius="15" click="onPrevPageButtonClick( event )" />
+					<s:TextInput id="pageInput" text="{currentPage}" width="28" restrict="0-9" maxChars="3" enter="onPageInputEnter( event )" />
 					<s:Label text="/ {numPages}" />
-					
-					<s:Button label="다운로드" width="100%" click="onDownloadButtonClick( event )" />
+					<s:Button label=">" width="30" height="30" cornerRadius="15" click="onNextPageButtonClick( event )" />
+					<s:Button label="다운로드" width="100%" height="30" click="onDownloadButtonClick( event )" />
 				</s:HGroup>
 			</s:VGroup>
 			
