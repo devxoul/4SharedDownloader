@@ -23,9 +23,7 @@
   <buildTargets>
     <buildTarget buildTargetName="default">
       <airSettings airCertificatePath="/xoul.p12" airTimestamp="true" version="1">
-        <airExcludes>
-          <pathEntry path="icon.png"/>
-        </airExcludes>
+        <airExcludes/>
       </airSettings>
       <actionScriptSettings version="1"/>
     </buildTarget>
