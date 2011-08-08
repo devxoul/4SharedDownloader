@@ -5,15 +5,9 @@ package bindings
 
 	public class Song
 	{
-		[Bindable]
 		public var title : String;
-		
-		[Bindable]
 		public var size : String;
-		
-		[Bindable]
 		public var link : String;
-		
 		public var downloaded : Boolean;
 		
 		public function Song() {}
