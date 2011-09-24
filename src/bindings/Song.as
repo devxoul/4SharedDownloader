@@ -2,7 +2,8 @@ package bindings
 {
 	import flash.filesystem.File;
 	import flash.filesystem.FileStream;
-
+	
+	[Bindable]
 	public class Song
 	{
 		public var title : String;
