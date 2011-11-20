@@ -3,7 +3,7 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   xmlns:components="components.*"
-					   title="4Shared Downloader v1.0.3" fontFamily="Malgun Gothic" showStatusBar="false"
+					   title="4Shared Downloader v1.0.4" fontFamily="Malgun Gothic" showStatusBar="false"
 					   addedToStage="init()">
 	
 	<fx:Style>
@@ -24,6 +24,8 @@
 			import air.update.events.StatusUpdateErrorEvent;
 			import air.update.events.UpdateEvent;
 			
+			import analyzer.Analyzer;
+			
 			import bindings.Downloading;
 			import bindings.Song;
 			
@@ -39,6 +41,11 @@
 			private static const NEW_LINE_PATTERN : String = "(\r|\n)";
 			
 			private static const XOUL_KR_REQ : URLRequest = new URLRequest( "http://xoul.kr" );
+			
+			private static const REQUEST_ID : String = "http://jagur.joyfl.kr/4shared_downloader_analyzer/get_id.php";
+			private static const REQUEST_CONNECT : String = "http://jagur.joyfl.kr/4shared_downloader_analyzer/connect.php";
+			private static const REQUEST_SEARCH : String = "http://jagur.joyfl.kr/4shared_downloader_analyzer/search.php";
+			private static const REQUEST_DOWNLOAD : String = "http://jagur.joyfl.kr/4shared_downloader_analyzer/download.php";
 			
 			/**
 			 * 검색어 입력할 때 추가하고 제거할 아스키코드.
@@ -70,9 +77,10 @@
 			private var downloadings : ArrayList;
 			
 			[Bindable]
-			private var searchContainerWidth : Number = 270;
+			private var searchContainerWidth : Number = 290;
 			
 			private var _appUpdater : ApplicationUpdaterUI;
+			
 			
 			private function init() : void
 			{
@@ -89,6 +97,16 @@
 				updateDownloadPathInput();
 				
 				stage.addEventListener( MouseEvent.MOUSE_UP, onMouseUp );
+								
+				if( !Setting.getSetting( SettingKeys.ANALYZER_ID ) )
+				{
+					trace( "request id" );
+					Analyzer.request( REQUEST_ID, null, onRequestIdComplete );
+				}
+				else
+				{
+					Analyzer.request( REQUEST_CONNECT, { id : Setting.getSetting( SettingKeys.ANALYZER_ID ) }, onRequestConnectComplete );
+				}
 			}
 			
 			private function initAppUpdater() : void
@@ -113,6 +131,42 @@
 			private function onAppUpdaterError( e : ErrorEvent ) : void
 			{
 				trace( "ApplicationUpdaterUI 에러랑께!!", e.toString() );
+			}
+			
+			/**
+			 * 
+			 */
+			private function onRequestIdComplete( data : String ) : void
+			{
+				trace( "ID를 받았다!!", data );
+				Setting.setSetting( SettingKeys.ANALYZER_ID, data );
+				
+				trace( "연결!!", Setting.getSetting( SettingKeys.ANALYZER_ID ) );
+				Analyzer.request( REQUEST_CONNECT, { id : Setting.getSetting( SettingKeys.ANALYZER_ID ) }, onRequestConnectComplete );
+			}
+			
+			/**
+			 * 
+			 */
+			private function onRequestConnectComplete( data : String ) : void
+			{
+				
+			}
+			
+			/**
+			 * 
+			 */
+			private function onRequestSearchComplete( data : String ) : void
+			{
+				trace( "search request 결과 :", data );
+			}
+			
+			/**
+			 * 
+			 */
+			private function onRequestDownloadComplete( data : String ) : void
+			{
+				
 			}
 			
 			/**
@@ -160,6 +214,12 @@
 				else _searchWord = searchWord;
 				
 				startBusy();
+				
+				var ba : ByteArray = new ByteArray;
+				ba.writeUTFBytes( _searchWord );
+				
+				Analyzer.request( REQUEST_SEARCH, { id : Setting.getSetting( SettingKeys.ANALYZER_ID ),
+													search : ba.toString() }, onRequestSearchComplete );
 				
 				var url : String = SEARCH_BASE_URL.split( "SEARCH_OPTION" ).join( searchOptionList.selectedItem.value ).split( "PAGE" ).join( ( page - 1 ) * 10 ) + encodeURI( _searchWord );
 				trace( "검색 url은???", url );
@@ -283,6 +343,13 @@
 				downloading.index = downloadings.length;
 				downloading.startDownload( url, downloadPathInput.text, downloading.title );
 				downloadings.addItem( downloading );
+				
+				// 스크롤 가장 아래로
+				downloadList.validateNow();
+				downloadList.ensureIndexIsVisible( downloadings.length - 1 );
+				
+				Analyzer.request( REQUEST_DOWNLOAD, { id : Setting.getSetting( SettingKeys.ANALYZER_ID ),
+													  title : downloading.title }, onRequestDownloadComplete );
 			}
 			
 			/**
@@ -306,6 +373,20 @@
 			private function onDeleteAllFromListLabelClick( e : MouseEvent ) : void
 			{
 				downloadings.removeAll();
+			}
+			
+			/**
+			 * '완료 목록 제거' 클릭
+			 */
+			private function onDeleteCompletedLabelClick( e : MouseEvent ) : void
+			{
+				trace( "완료 제거!!" );
+				
+				for each( var downloading : Downloading in downloadings.source )
+				{
+					if( downloading.currentState == Downloading.STATE_COMPLETE ) 
+						downloadings.removeItem( downloading );
+				}
 			}
 			
 			/**
@@ -448,8 +529,7 @@
 			 */
 			private function onDownloadingCancel( e : DownloadEvent ) : void
 			{
-				var index : int = e.index;
-				Downloading( downloadings.source[index] ).cancelDownload();
+				Downloading( e.downloading ).cancelDownload();
 			}
 			
 			/**
@@ -457,9 +537,7 @@
 			 */
 			private function onDownloadingRestart( e : DownloadEvent ) : void
 			{
-				var index : int = e.index;
-				var downloading : Downloading = downloadings.source[index] as Downloading;
-				downloading.restartDownload();
+				e.downloading.restartDownload();
 			}
 			
 			/**
@@ -467,8 +545,7 @@
 			 */
 			private function onDownloadingRemoveFromList( e : DownloadEvent ) : void
 			{
-				var index : int = e.index;
-				downloadings.removeItemAt( index );
+				downloadings.removeItem( e.downloading );
 			}
 			
 			/**
@@ -476,12 +553,11 @@
 			 */
 			private function onDownloadingRemoveFromDisk( e : DownloadEvent ) : void
 			{
-				var index : int = e.index;
-				var downloading : Downloading = downloadings.source[index] as Downloading;
+				var downloading : Downloading = e.downloading;
 				if( !downloading ) return;
 				downloading.cancelDownload();
 				downloading.removeFromDisk();
-				downloadings.removeItemAt( index );
+				downloadings.removeItem( downloading );
 			}
 			
 			private function onXoulLabelButtonClick( e : MouseEvent ) : void
@@ -564,6 +640,7 @@
 				<s:HGroup>
 					<components:LabelButton text="다운로드 폴더 열기" click="onOpenDownloadPathLabelClick( event )" />
 					<components:LabelButton text="모두 목록에서 제거" click="onDeleteAllFromListLabelClick( event )" />
+					<components:LabelButton text="완료 목록 제거" click="onDeleteCompletedLabelClick( event )" />
 				</s:HGroup>
 				
 				<!-- 다운로드 현황 리스트 -->

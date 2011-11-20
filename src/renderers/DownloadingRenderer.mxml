@@ -11,6 +11,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import bindings.Downloading;
+			
 			import components.DownloadList;
 			
 			import events.DownloadEvent;
@@ -41,7 +43,7 @@
 			private function dispatchDownloadEvent( type : String ) : void
 			{
 				var downloadEvent : DownloadEvent = new DownloadEvent( type );
-				downloadEvent.index = data.index;
+				downloadEvent.downloading = data as Downloading;
 				DownloadList( parentDocument.parent ).dispatchEvent( downloadEvent );
 			}
 			
@@ -49,7 +51,7 @@
 			{
 				if( !data.bytesLoaded || !data.bytesTotal ) return;
 				if( data.bytesLoaded >= data.bytesTotal )
-					currentState = "finish";
+					currentState = "complete";
 			}
 			
 		]]>
@@ -58,18 +60,18 @@
 	<s:states>
 		<s:State name="download" />
 		<s:State name="cancel" />
-		<s:State name="finish" />
+		<s:State name="complete" />
 	</s:states>
 	
 	<s:Label text="{data.title}" fontWeight="bold" />
 	
 	<s:Label text.download="{int( data.bytesLoaded / 1024 )} KB / {int( data.bytesTotal / 1024 )} KB ({int( data.bytesLoaded / data.bytesTotal * 100 )}%)"
-			 text.cancel="취소됨" text.finish="완료" color="0x999999" />
+			 text.cancel="취소됨" text.complete="완료" color="0x999999" />
 	
 	<s:HGroup paddingTop="-2">
 		<components:LabelButton includeIn="download" text="취소" click="onCancelButtonClick( event )" />
 		<components:LabelButton includeIn="cancel" text="다시시작" click="onRestartButtonClick( event )" />
-		<components:LabelButton includeIn="cancel, finish" text="목록에서 제거" click="onRemoveFromListButtonClick( event )" />
-		<components:LabelButton includeIn="cancel, finish" text="디스크에서 제거" click="onRemoveFromDiskButtonClick( event )" />
+		<components:LabelButton includeIn="cancel, complete" text="목록에서 제거" click="onRemoveFromListButtonClick( event )" />
+		<components:LabelButton includeIn="cancel, complete" text="디스크에서 제거" click="onRemoveFromDiskButtonClick( event )" />
 	</s:HGroup>
 </s:ItemRenderer>

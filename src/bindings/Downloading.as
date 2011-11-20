@@ -15,6 +15,10 @@ package bindings
 
 	public class Downloading
 	{
+		public static const STATE_DOWNLOAD : String = "download";
+		public static const STATE_COMPLETE: String = "complete";
+		public static const STATE_CANCEL : String = "cancel";
+		
 		[Bindable]
 		public var title : String;
 		
@@ -25,7 +29,7 @@ package bindings
 		public var bytesTotal : int;
 		
 		[Bindable]
-		public var currentState : String = "download";
+		public var currentState : String = STATE_DOWNLOAD;
 		
 		public var index : int;
 		
@@ -75,7 +79,7 @@ package bindings
 		 */
 		public function restartDownload() : void
 		{
-			currentState = "download";
+			currentState = STATE_DOWNLOAD;
 			_startDownload();
 		}
 		
@@ -84,7 +88,7 @@ package bindings
 		 */
 		public function cancelDownload() : void
 		{
-			currentState = "cancel";
+			currentState = STATE_CANCEL;
 			if( _urlStream.connected ) _urlStream.close();
 			if( _fileStream ) _fileStream.close();
 		}
@@ -130,6 +134,8 @@ package bindings
 		
 		private function onDownloadComplete( e : Event ) : void
 		{
+			currentState = STATE_COMPLETE;
+			
 			_urlStream.close();
 			_fileStream.close();
 		}
