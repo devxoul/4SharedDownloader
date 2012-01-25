@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<update xmlns="http://ns.adobe.com/air/framework/update/description/2.5">
+
+<versionNumber>1.0.4</versionNumber>
+
+<url>http://blog.xoul.kr/attachment/cfile7.uf@1552E6444ECF9E6804E4EC.air</url>
+
+<description><![CDATA[4Shared Downloader v1.0.4
+* 다운로드를 완료한 목록을 제거해주는 완료 목록 제거 버튼 추가
+* 새 다운로드가 추가되면 다운로드 목록이 가장 아래로 스크롤되도록 변경]]></description>
+
+</update>

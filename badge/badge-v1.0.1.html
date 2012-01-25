@@ -35,22 +35,22 @@
 		so.useExpressInstall('expressinstall.swf');
 		
 		// these parameters are required for badge install:
-		so.addVariable("airversion", "1.0"); // version of AIR runtime required
+		so.addVariable("airversion", "2.6"); // version of AIR runtime required
 		so.addVariable("appname", "4Shared Downloader"); // application name to display to the user
-		so.addVariable("appurl", "http://joyfl.kr/xoul/4SharedDownloader/downloads/4SharedDownloader-1.0.0.air"); // absolute URL (beginning with http or https) of the application ".air" file
+		so.addVariable("appurl", "http://blog.xoul.kr/attachment/cfile29.uf@186D3C394E3F9B5908DD4E.air"); // absolute URL (beginning with http or https) of the application ".air" file
 		
 		// these parameters are required to support launching apps from the badge (but optional for install):
 		so.addVariable("appid", "kr.xoul.4SharedDownloader"); // the qualified application ID (ex. com.gskinner.air.MyApplication)
 		so.addVariable("pubid", ""); // publisher id
 		
 		// this parameter is required in addition to the above to support upgrading from the badge:
-		so.addVariable("appversion", "1.0.0"); // AIR application version
+		so.addVariable("appversion", "1.0.1"); // AIR application version
 		
 		// these parameters are optional:
-		so.addVariable("image", "demoImage.jpg"); // URL for an image (JPG, PNG, GIF) or SWF to display in the badge (205px wide, 170px high)
+//		so.addVariable("image", "demoImage.jpg"); // URL for an image (JPG, PNG, GIF) or SWF to display in the badge (205px wide, 170px high)
 		so.addVariable("appinstallarg", "installed from web"); // passed to the application when it is installed from the badge
 		so.addVariable("applauncharg", "launched from web"); // passed to the application when it is launched from the badge
-		so.addVariable("helpurl", ""); // optional url to a page containing additional help, displayed in the badge's help screen
+//		so.addVariable("helpurl", ""); // optional url to a page containing additional help, displayed in the badge's help screen
 		so.addVariable("hidehelp", "true"); // hides the help icon if "true"
 		so.addVariable("skiptransition", "false"); // skips the initial transition if "true"
 		so.addVariable("titlecolor", "#EEEEEE"); // changes the color of titles

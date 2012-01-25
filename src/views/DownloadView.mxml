@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:fsd="*"
+		 xmlns:components="components.*"
+		 creationComplete="init()">
+	
+	<fx:Declarations>
+		<fsd:Main id="main" />
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import analyzer.Analyzer;
+			
+			import bindings.Downloading;
+			import bindings.Song;
+			
+			import events.DownloadEvent;
+			
+			import mx.collections.ArrayList;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			
+			[Bindable]
+			private var downloadings : ArrayList = new ArrayList;
+			
+			private function init() : void
+			{
+				updateDownloadPathInput();
+			}
+			
+			/**
+			 * 다운로드를 시작할 때 사용되는 메서드.
+			 */
+			public function download( song : Song ) : void
+			{
+				if( downloadPathInput.text == "" )
+				{
+					Alert.show( "다운로드 위치가 올바르지 않습니다." );
+					return;
+				}
+				
+				var len : int = downloadings.length;
+				var selectedTitle : String = song.title;
+				for( var i : int = 0; i < len; i++ )
+				{
+					if( downloadings.source[i].title == selectedTitle )
+					{
+						Alert.show( "다운로드 목록에 같은 이름의 파일이 존재합니다." );
+						return;
+					}
+				}
+				
+				var url : String = song.link;
+				
+				var downloading : Downloading = new Downloading;
+				downloading.title = song.title;
+				downloading.index = downloadings.length;
+				downloading.startDownload( url, downloadPathInput.text, downloading.title );
+				downloadings.addItem( downloading );
+				
+				// 스크롤 가장 아래로
+				downloadList.validateNow();
+				downloadList.ensureIndexIsVisible( downloadings.length - 1 );
+				
+				Analyzer.request( Const.REQUEST_DOWNLOAD, { id : Setting.getSetting( SettingKeys.ANALYZER_ID ),
+					title : downloading.title }, onRequestDownloadComplete );
+			}
+			
+			/**
+			 * '다운로드 위치 열기' 클릭
+			 */
+			private function onOpenDownloadPathLabelClick( e : MouseEvent ) : void
+			{
+				if( downloadPathInput.text == "" )
+				{
+					Alert.show( "다운로드 위치가 올바르지 않습니다." );
+					return;
+				}
+				var file : File = new File( downloadPathInput.text );
+				file.openWithDefaultApplication();
+				file = null;
+			}
+			
+			/**
+			 * '모두 목록에서 제거' 클릭
+			 */
+			private function onDeleteAllFromListLabelClick( e : MouseEvent ) : void
+			{
+				downloadings.removeAll();
+			}
+			
+			/**
+			 * '완료 목록 제거' 클릭
+			 */
+			private function onDeleteCompletedLabelClick( e : MouseEvent ) : void
+			{
+				trace( "완료 제거!!" );
+				
+				for each( var downloading : Downloading in downloadings.source )
+				{
+					if( downloading.currentState == Downloading.STATE_COMPLETE ) 
+						downloadings.removeItem( downloading );
+				}
+			}
+			
+			/**
+			 * 파일 다운로드 위치에서 [...] 버튼 클릭할 때 실행되는 메서드.
+			 */
+			private function onBrowseButtonClick( e : MouseEvent ) : void
+			{
+				browseForDownloadDirectory();
+			}
+			
+			/**
+			 * 다운로드 위치를 선택하는 다이얼로그를 띄운다.
+			 */
+			private function browseForDownloadDirectory() : void
+			{
+				var file : File = new File;
+				file.browseForDirectory( "다운로드 위치 선택" );
+				file.addEventListener( Event.SELECT, onDownloadDirectorySelect );
+			}
+			
+			/**
+			 * 다운로드 디렉토리 선택시 실행되는 메서드.
+			 */
+			private function onDownloadDirectorySelect( e : Event ) : void
+			{
+				var file : File = e.target as File;
+				file.removeEventListener( Event.SELECT, onDownloadDirectorySelect );
+				var path : String = file.nativePath;
+				Setting.setSetting( SettingKeys.DOWNLOAD_PATH, path );
+				file = null;
+				updateDownloadPathInput();
+			}
+			
+			/**
+			 * 다운로드 경로를 업데이트한다.
+			 */
+			private function updateDownloadPathInput() : void
+			{
+				var path : String = Setting.getSetting( SettingKeys.DOWNLOAD_PATH ) as String;
+				if( path ) 
+				{
+					// 텍스트필드에 appendText를 하면 자동으로 오른쪽 끝으로 스크롤된다.
+					downloadPathInput.text = "";
+					downloadPathInput.appendText( path );
+				}
+				else
+				{
+					Alert.show( "다운로드 위치를 지정하세요.", "", 4, null, onDownloadPathAlertClose );
+				}
+			}
+			
+			/**
+			 * "다운로드 위치를 지정하세요." 알림창이 닫힐 때 실행되는 메서드.
+			 */
+			private function onDownloadPathAlertClose( e : CloseEvent ) : void
+			{
+				browseForDownloadDirectory();
+			}
+			
+			/**
+			 * 다운로드를 취소했을 때 실행되는 메서드.
+			 */
+			private function onDownloadingCancel( e : DownloadEvent ) : void
+			{
+				Downloading( e.downloading ).cancelDownload();
+			}
+			
+			/**
+			 * 다운로드를 재시작했을 때 실행되는 메서드.
+			 */
+			private function onDownloadingRestart( e : DownloadEvent ) : void
+			{
+				e.downloading.restartDownload();
+			}
+			
+			/**
+			 * 목록에서 제거 버튼을 클릭했을 때 실행되는 메서드.
+			 */
+			private function onDownloadingRemoveFromList( e : DownloadEvent ) : void
+			{
+				downloadings.removeItem( e.downloading );
+			}
+			
+			/**
+			 * 디스크에서 제거 버튼을 클릭했을 때 실행되는 메서드.
+			 */
+			private function onDownloadingRemoveFromDisk( e : DownloadEvent ) : void
+			{
+				var downloading : Downloading = e.downloading;
+				if( !downloading ) return;
+				downloading.cancelDownload();
+				downloading.removeFromDisk();
+				downloadings.removeItem( downloading );
+			}
+			
+			/**
+			 * 
+			 */
+			private function onRequestDownloadComplete( data : String ) : void
+			{
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<!-- 다운로드 위치 -->
+	<s:HGroup width="100%" verticalAlign="middle">
+		<components:LabelButton text="다운로드 위치" click="onOpenDownloadPathLabelClick( event )" />
+		<s:Label text=":" />
+		<s:TextInput id="downloadPathInput" width="100%" />
+		<s:Button label="..." width="32" click="onBrowseButtonClick( event )" />
+	</s:HGroup>
+	
+	<s:HGroup>
+		<components:LabelButton text="다운로드 폴더 열기" click="onOpenDownloadPathLabelClick( event )" />
+		<components:LabelButton text="모두 목록에서 제거" click="onDeleteAllFromListLabelClick( event )" />
+		<components:LabelButton text="완료 목록 제거" click="onDeleteCompletedLabelClick( event )" />
+	</s:HGroup>
+	
+	<!-- 다운로드 현황 리스트 -->
+	<components:DownloadList id="downloadList" width="100%" height="100%"
+							 itemRenderer="renderers.DownloadingRenderer" dataProvider="{downloadings}"
+							 cancel="onDownloadingCancel( event )"
+							 restart="onDownloadingRestart( event )"
+							 removeFromList="onDownloadingRemoveFromList( event )"
+							 removeFromDisk="onDownloadingRemoveFromDisk( event )" />
+</s:Group>

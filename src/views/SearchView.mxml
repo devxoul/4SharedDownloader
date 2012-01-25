@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:fsd="*"
+		 xmlns:components="components.*"
+		 creationComplete="init()">
+	
+	<fx:Declarations>
+		<fsd:Main id="main" />
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import analyzer.Analyzer;
+			
+			import bindings.Song;
+			
+			import events.DownloadEvent;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			
+			/**
+			 * 검색어 입력할 때 추가하고 제거할 아스키코드.
+			 */
+			private static const SEPERATOR : String = String.fromCharCode( 16 );
+			
+			private var _searchLoader : URLLoader = new URLLoader;
+			
+			/**
+			 * 현재 검색어
+			 */
+			private var _searchWord : String;
+			
+			private var _numResults : int;
+			
+			[Bindable]
+			private var currentPage : int = 1;
+			
+			[Bindable]
+			private var numPages : int;
+			
+			[Bindable]
+			private var searchResults : ArrayList = new ArrayList;
+			
+			[Binable]
+			private var pages : ArrayList = new ArrayList;
+			
+			
+			private function init() : void
+			{
+				_searchLoader.addEventListener( Event.COMPLETE, onSearchLoadComplete );
+				_searchLoader.addEventListener( IOErrorEvent.IO_ERROR, onSearchLoaderIOError );
+			}
+			
+			/**
+			 * 검색창에서 엔터키를 입력할 때 실행되는 메서드.
+			 */
+			private function onSearchWordInputEnter( e : FlexEvent ) : void
+			{
+				setSearchWord();
+				search( _searchWord, 1 );				
+			}
+			
+			/**
+			 * 검색 버튼을 클릭할 때 실행되는 메서드.
+			 */
+			private function onSearchButtonClick( e : MouseEvent ) : void
+			{
+				setSearchWord();
+				search( _searchWord, 1 );
+			}
+			
+			/**
+			 * _searchWord를 searchWordInput.text에서 한글 잘림 방지를 한 문자열로 설정한다.
+			 */
+			private function setSearchWord() : void
+			{
+				if( searchWordInput.text == "" )
+				{
+					Alert.show( "검색어를 입력해주세요." );
+					return;
+				}
+				
+				searchWordInput.appendText( SEPERATOR );
+				searchWordInput.text = searchWordInput.text.split( SEPERATOR ).join( "" );
+				searchWordInput.selectRange( searchWordInput.text.length, searchWordInput.text.length );
+				_searchWord = searchWordInput.text;
+			}
+			
+			/**
+			 * 검색어로 검색한다.
+			 * @param page 검색할 페이지.
+			 */
+			private function search( searchWord : String = null, page : int = 1 ) : void
+			{
+				if( !searchWord ) searchWord = _searchWord;
+				else _searchWord = searchWord;
+				
+				startBusy();
+				
+				var ba : ByteArray = new ByteArray;
+				ba.writeUTFBytes( _searchWord );
+				
+				Analyzer.request( Const.REQUEST_SEARCH, { id : Setting.getSetting( SettingKeys.ANALYZER_ID ),
+					search : ba.toString() }, onRequestSearchComplete );
+				
+				var url : String = Const.SEARCH_BASE_URL.split( "SEARCH_OPTION" ).join( searchOptionList.selectedItem.value ).split( "PAGE" ).join( ( page - 1 ) * 10 ) + encodeURI( _searchWord );
+				trace( "검색 url은???", url );
+				_searchLoader.load( new URLRequest( url ) );
+				
+				currentPage = page;
+			}
+			
+			/**
+			 * 검색 결과 로드 명령이 완료되었을 때 실행되는 메서드.
+			 */
+			private function onSearchLoadComplete( e : Event ) : void
+			{
+				searchResults.removeAll();
+				parseSearchResult( _searchLoader.data );
+				
+				stopBusy();
+				
+				trace( "searchResultList에 자식이 몇개??", searchResultList.numChildren );
+			}
+			
+			/**
+			 * 검색 결과 로드에서 에러가 날 경우<br /><br />
+			 * <b>현재까지 알려진 에러</b><br />
+			 * - 검색어가 '\'일 경우
+			 */
+			private function onSearchLoaderIOError( e : IOErrorEvent ) : void
+			{
+				trace( "search 에!러!" );
+				stopBusy();
+			}
+			
+			/**
+			 * 검색된 결과를 파싱해서 리스트에 뿌려준다.
+			 * @param html 검색된 결과 html
+			 */
+			private function parseSearchResult( html : String ) : void
+			{
+				var data : Array = html.split( '<td width="102" class="simpleThumb">' );
+				var len : int = data.length;
+				
+				// 검색결과 없음
+				if( len <= 1 )
+				{
+					_numResults = 0;
+					numPages = 0;
+					return;
+				}
+				
+				_numResults = int( data[len - 1].split( '<td class="pager">&nbsp;(총' )[1].split( ')' )[0] );
+				numPages = Math.ceil( _numResults / 10 );
+				
+				for( var i : int = 1; i < len; i++ )
+				{
+					var song : Song = new Song;
+					song.title = data[i].split( 'class="absmid" alt="' )[1].split( '"' )[0];
+					song.size = data[i].split( '<div class="fsize">' )[1].split( /(\r|\n) *<\/div>/ )[0];
+					song.link = data[i].split( 'onclick="return showMediaPreview(event, ' )[1].split( "','mp3'" )[0].split( "'" )[1];
+					searchResults.addItem( song );
+					//					trace( "제목 :", song.title );
+					//					trace( "크기 :", song.size );
+					//					trace( "링크 :", song.link );
+					//					trace( "" );
+				}
+				
+				len = _numResults / 10;
+				for( i = 0; i < len; i++ )
+				{
+					pages.addItem( i + 1 );
+				}
+			}
+			
+			/**
+			 * 다운로드 버튼을 클릭할 때 실행되는 메서드.
+			 */
+			private function onDownloadButtonClick( e : MouseEvent ) : void
+			{
+				download( searchResultList.selectedItem );
+			}
+			
+			/**
+			 * 검색결과 리스트에 있는 아이템을 더블클릭할 때 실행되는 메서드.
+			 */
+			private function onSearchResultItemListDoubleClick( e : DownloadEvent ) : void
+			{
+				download( searchResultList.selectedItem );
+			}
+			
+			/**
+			 * 
+			 */
+			private function download( song : Song ) : void
+			{
+				if( searchResultList.selectedIndex == -1 )
+				{
+					Alert.show( "다운로드할 곡을 선택해주세요." );
+					return;
+				}
+				
+				main.downloadView.download( song );
+			}
+			
+			/**
+			 * 이전 페이지 버튼을 클릭할 때 실행되는 메서드.
+			 */
+			private function onPrevPageButtonClick( e : MouseEvent ) : void
+			{
+				if( !searchResults.length ) return;
+				if( currentPage == 1 ) return;
+				search( null, --currentPage );
+			}
+			
+			/**
+			 * 페이지 인풋이 바뀔 때 실행되는 메서드.
+			 */
+			private function onPageInputEnter( e : FlexEvent ) : void
+			{
+				if( !searchResults.length ) return;
+				
+				var inputPage : int = int( pageInput.text );
+				if( 1 <= inputPage && inputPage <= numPages )
+				{
+					search( null, currentPage = inputPage );
+				}
+				else
+				{
+					pageInput.text = String( currentPage );
+					pageInput.selectAll();
+				}
+			}
+			
+			/**
+			 * 다음 페이지 버튼을 클릭할 때 실행되는 메서드.
+			 */
+			private function onNextPageButtonClick( e : MouseEvent ) : void
+			{
+				if( !searchResults.length ) return;
+				if( currentPage == numPages ) return;
+				search( null, ++currentPage );
+			}
+			
+			/**
+			 * 
+			 */
+			private function onRequestSearchComplete( data : String ) : void
+			{
+				trace( "search request 결과 :", data );
+			}
+			
+			private function startBusy() : void
+			{
+				this.enabled = false;
+				cursorManager.setBusyCursor();
+			}
+			
+			private function stopBusy() : void
+			{
+				this.enabled = true;
+				cursorManager.removeBusyCursor();
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<!-- 검색 -->
+	<s:HGroup width="100%">
+		<s:TextInput id="searchWordInput" width="100%" enter="onSearchWordInputEnter( event )" />
+		<s:Button label="검색" width="50" click="onSearchButtonClick( event )" />
+	</s:HGroup>
+	
+	<s:HGroup width="100%" verticalAlign="middle">
+		<s:Label text="검색옵션 :" />
+		<s:DropDownList id="searchOptionList" width="100%" itemRenderer="renderers.SearchOptionRenderer" selectedIndex="2">
+			<s:dataProvider>
+				<s:ArrayList>
+					<fx:Object label="전체" value="{SearchOption.ALL_TIME}" />
+					<fx:Object label="지난달" value="{SearchOption.LAST_MONTH}" />
+					<fx:Object label="크기 (큰 → 작은)" value="{SearchOption.LARGE}" />
+					<fx:Object label="크기 (작은 → 큰)" value="{SearchOption.SMALL}" />
+					<fx:Object label="이름 (A → Z)" value="{SearchOption.A_Z}" />
+					<fx:Object label="이름 (Z → A)" value="{SearchOption.Z_A}" />
+					<fx:Object label="최근" value="{SearchOption.RECENT}" />
+				</s:ArrayList>
+			</s:dataProvider>
+		</s:DropDownList>
+	</s:HGroup>
+	
+	<!-- 검색결과 리스트 -->
+	<components:SearchResultList id="searchResultList" width="100%" height="100%"
+								 itemRenderer="renderers.SearchResultRenderer" dataProvider="{searchResults}"
+								 start="onSearchResultItemListDoubleClick( event )" />
+	
+	<s:HGroup width="100%" height="30" verticalAlign="middle">
+		<s:Button label=">" scaleX="-1" width="30" height="30" cornerRadius="15" click="onPrevPageButtonClick( event )" />
+		<s:TextInput id="pageInput" text="{currentPage}" width="28" restrict="0-9" maxChars="3" enter="onPageInputEnter( event )" />
+		<s:Label text="/ {numPages}" />
+		<s:Button label=">" width="30" height="30" cornerRadius="15" click="onNextPageButtonClick( event )" />
+		<s:Button label="다운로드" width="100%" height="30" click="onDownloadButtonClick( event )" />
+	</s:HGroup>
+</s:Group>
