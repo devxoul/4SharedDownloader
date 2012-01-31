@@ -25,6 +25,7 @@ package analyzer
 		public static function request( url : String, param : Object, callback : Function ) : void
 		{
 			if( !_instance ) initialte();
+			if( Const.DEBUGGING ) return;
 			
 			var urlReq : URLRequest = new URLRequest( url );
 			

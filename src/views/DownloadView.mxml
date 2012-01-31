@@ -99,9 +99,11 @@
 			{
 				trace( "완료 제거!!" );
 				
-				for each( var downloading : Downloading in downloadings.source )
+				var downloading : Downloading;
+				for( var i : int = downloadings.length - 1; i >= 0; i-- )
 				{
-					if( downloading.currentState == Downloading.STATE_COMPLETE ) 
+					downloading = downloadings.getItemAt( i ) as Downloading;
+					if( downloading.currentState == Downloading.STATE_COMPLETE )
 						downloadings.removeItem( downloading );
 				}
 			}
