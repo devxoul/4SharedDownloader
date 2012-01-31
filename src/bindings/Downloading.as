@@ -98,7 +98,9 @@ package bindings
 		 */
 		public function removeFromDisk() : void
 		{
-			_downloadFile.deleteFile();
+			// 로컬에서 파일을 수동으로 지웠을 경우 에러나는 것 방지
+			if( _downloadFile.exists )
+				_downloadFile.deleteFile();
 		}
 		
 		/**
