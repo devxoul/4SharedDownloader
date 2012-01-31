@@ -299,6 +299,7 @@
 	<!-- 검색결과 리스트 -->
 	<components:SearchResultList id="searchResultList" width="100%" height="100%"
 								 itemRenderer="renderers.SearchResultRenderer" dataProvider="{searchResults}"
+								 alternatingItemColors="[0xFFFFFF, 0xEEEEEE]" rollOverColor="{0xB2E1FF}" selectionColor="{0x7FCEFF}"
 								 start="onSearchResultItemListDoubleClick( event )" />
 	
 	<s:HGroup width="100%" height="30" verticalAlign="middle">
