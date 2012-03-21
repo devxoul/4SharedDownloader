@@ -163,12 +163,12 @@
 					var song : Song = new Song;
 					song.title = data[i].split( 'class="absmid" alt="' )[1].split( '"' )[0];
 					song.size = data[i].split( '<div class="fsize">' )[1].split( /(\r|\n) *<\/div>/ )[0];
-					song.link = data[i].split( 'onclick="return showMediaPreview(event, ' )[1].split( "','mp3'" )[0].split( "'" )[1];
+					song.url = "http://www.4shared.com/mp3/" + data[i].split( '<a href="http://www.4shared.com/mp3/' )[1].split( '/file.htm' )[0] + "/file.htm";
 					searchResults.addItem( song );
-					//					trace( "제목 :", song.title );
-					//					trace( "크기 :", song.size );
-					//					trace( "링크 :", song.link );
-					//					trace( "" );
+//					trace( "제목 :", song.title );
+//					trace( "크기 :", song.size );
+//					trace( "링크 :", song.url );
+//					trace( "" );
 				}
 				
 				len = _numResults / 10;
