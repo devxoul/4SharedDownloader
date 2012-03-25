@@ -2,8 +2,6 @@ package
 {
 	public class Const
 	{
-		public static const VERSION : String = "1.0.5";
-		
 		public static const SEARCH_BASE_URL : String = "http://search.4shared.com/q/SEARCH_OPTION/PAGE/music/";
 		public static const NEW_LINE_PATTERN : String = "(\r|\n)";
 				

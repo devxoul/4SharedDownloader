@@ -19,9 +19,6 @@
 			
 			import events.DownloadEvent;
 			
-			import flash.utils.setInterval;
-			import flash.utils.setTimeout;
-			
 			import mx.collections.ArrayList;
 			import mx.controls.Alert;
 			import mx.events.CloseEvent;
@@ -56,29 +53,13 @@
 					}
 				}
 				
+				var url : String = song.link;
+				
 				var downloading : Downloading = new Downloading;
 				downloading.title = song.title;
 				downloading.index = downloadings.length;
+				downloading.startDownload( url, downloadPathInput.text, downloading.title );
 				downloadings.addItem( downloading );
-				
-				var loader : URLLoader = new URLLoader;
-				loader.addEventListener( Event.COMPLETE, onURLLoadComplete );
-				loader.load( new URLRequest( song.url ) );
-			}
-			
-			/**
-			 * song.url 로드 완료
-			 */
-			private function onURLLoadComplete( e : Event ) : void
-			{
-				var html : String = e.target.data;
-				var link :String = html.split( 'window.location = "' )[1].split( '";' )[0];
-				trace( link );
-				
-				var downloading : Downloading = downloadings.getItemAt( downloadings.length - 1 ) as Downloading;
-				setTimeout( function() : void {
-					downloading.startDownload( link, downloadPathInput.text, downloading.title );
-				}, 15000 );
 				
 				// 스크롤 가장 아래로
 				downloadList.validateNow();

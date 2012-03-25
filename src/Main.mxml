@@ -3,7 +3,7 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   xmlns:components="components.*"
-					   title="4Shared Downloader v{Const.VERSION}" fontFamily="Malgun Gothic" showStatusBar="false"
+					   title="4Shared Downloader v1.0.5" fontFamily="Malgun Gothic" showStatusBar="false"
 					   addedToStage="onAddedToStage()" xmlns:views="views.*">
 	
 	<fx:Style>
@@ -76,7 +76,7 @@
 				{
 					Analyzer.request( Const.REQUEST_CONNECT, { id: Setting.getSetting( SettingKeys.ANALYZER_ID ) }, onRequestConnectComplete );
 					Analyzer.request( Const.REQUEST_UPDATES, { id: Setting.getSetting( SettingKeys.ANALYZER_ID ),
-															   version: Const.VERSION }, onRequestVersionComplete );
+															   version: "1.0.5" }, onRequestVersionComplete );
 				}
 			}
 			
