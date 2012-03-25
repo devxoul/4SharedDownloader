@@ -6,7 +6,11 @@
 
 <url>http://blog.xoul.kr/attachment/cfile7.uf@1552E6444ECF9E6804E4EC.air</url>
 
-<description><![CDATA[4Shared Downloader v1.0.4
+<description><![CDATA[4Shared Downloader v1.0.5
+* 4shared.com의 로그인 정책 변경에 맞춰 프로그램 로직 수정.
+* 검색 목록에서 각 셀의 색깔을 다르게하여 가독성 향상.
+
+4Shared Downloader v1.0.4
 * 다운로드를 완료한 목록을 제거해주는 완료 목록 제거 버튼 추가
 * 새 다운로드가 추가되면 다운로드 목록이 가장 아래로 스크롤되도록 변경]]></description>
 
