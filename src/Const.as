@@ -11,7 +11,7 @@ package
 		public static const REQUEST_DOWNLOAD : String = "http://xoul.kr/4SharedDownloader/analyzer/download.php";
 		public static const REQUEST_UPDATES : String = "http://xoul.kr/4SharedDownloader/analyzer/updates.php";
 		
-		public static const DEBUGGING : Boolean = false;
+		public static const DEBUGGING : Boolean = true;
 		
 		public function Const()
 		{
