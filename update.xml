@@ -2,11 +2,14 @@
 
 <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5">
 
-<versionNumber>1.0.5</versionNumber>
+<versionNumber>1.0.6</versionNumber>
 
-<url>http://blog.xoul.kr/attachment/cfile23.uf@18261D484F6F5DE8190EBE.air</url>
+<url>http://blog.xoul.kr/attachment/cfile7.uf@1257ED4C503A0FB5253300.air</url>
 
-<description><![CDATA[4Shared Downloader v1.0.5
+<description><![CDATA[4Shared Downloader v1.0.6
+* 프로그램 첫실행시 무한로딩이 되는 버그 해결
+
+4Shared Downloader v1.0.5
 * 4shared.com의 로그인 정책 변경에 맞춰 프로그램 로직 수정.
 * 검색 목록에서 각 셀의 색깔을 다르게하여 가독성 향상.
 
