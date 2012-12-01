@@ -155,7 +155,7 @@
 					return;
 				}
 				
-				_numResults = int( data[len - 1].split( '<td class="pager">&nbsp;(총' )[1].split( ')' )[0] );
+				_numResults = int( data[len - 1].split( '&nbsp;(총 ' )[1].split( ')' )[0] );
 				numPages = Math.ceil( _numResults / 10 );
 				
 				for( var i : int = 1; i < len; i++ )

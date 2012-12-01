@@ -6,7 +6,10 @@
 
 <url>http://blog.xoul.kr/attachment/cfile7.uf@1257ED4C503A0FB5253300.air</url>
 
-<description><![CDATA[4Shared Downloader v1.0.6
+<description><![CDATA[4Shared Downloader v1.0.7
+* 검색시 무한로딩이 되는 오류 해결
+
+4Shared Downloader v1.0.6
 * 프로그램 첫실행시 무한로딩이 되는 버그 해결
 
 4Shared Downloader v1.0.5
