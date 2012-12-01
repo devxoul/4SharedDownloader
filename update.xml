@@ -2,9 +2,9 @@
 
 <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5">
 
-<versionNumber>1.0.6</versionNumber>
+<versionNumber>1.0.7</versionNumber>
 
-<url>http://blog.xoul.kr/attachment/cfile7.uf@1257ED4C503A0FB5253300.air</url>
+<url>http://xoul.kr/4SharedDownloader/releases/4SharedDownloader-v1.0.7.air</url>
 
 <description><![CDATA[4Shared Downloader v1.0.7
 * 검색시 무한로딩이 되는 오류 해결
