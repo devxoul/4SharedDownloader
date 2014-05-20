@@ -2,11 +2,14 @@
 
 <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5">
 
-<versionNumber>1.0.7</versionNumber>
+<versionNumber>1.0.8</versionNumber>
 
-<url>http://xoul.kr/4SharedDownloader/releases/4SharedDownloader-v1.0.7.air</url>
+<url>https://dl.dropboxusercontent.com/u/69958027/4-shared-downloader/releases/4SharedDownloader-v1.0.8.air</url>
 
-<description><![CDATA[4Shared Downloader v1.0.7
+<description><![CDATA[4Shared Downloader v1.0.8
+* 검색시 무한로딩이 되는 오류 해결
+
+4Shared Downloader v1.0.7
 * 검색시 무한로딩이 되는 오류 해결
 
 4Shared Downloader v1.0.6

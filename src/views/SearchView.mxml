@@ -155,16 +155,20 @@
 					return;
 				}
 				
-				_numResults = int( data[len - 1].split( '&nbsp;(총 ' )[1].split( ')' )[0] );
+				_numResults = int( html.split( '<span id="total_q">' )[1].split( '<' )[0] );
 				numPages = Math.ceil( _numResults / 10 );
 				
 				for( var i : int = 1; i < len; i++ )
 				{
 					var song : Song = new Song;
-					song.title = data[i].split( 'class="absmid" alt="' )[1].split( '"' )[0];
-					song.size = data[i].split( '<div class="fsize">' )[1].split( /(\r|\n) *<\/div>/ )[0];
-					song.link = data[i].split( 'onclick="return showMediaPreview(event, ' )[1].split( "','mp3'" )[0].split( "'" )[1];
-					searchResults.addItem( song );
+					try {
+						song.title = data[i].split( 'class="absmid" alt="' )[1].split( '"' )[0];
+						song.size = data[i].split( '<div class="fsize">' )[1].split( /(\r|\n) *<\/div>/ )[0];
+						song.link = data[i].split( 'onclick="return showMediaPreview(event, ' )[1].split( "','mp3'" )[0].split( "'" )[1];
+						searchResults.addItem( song );
+					} catch( e:Error ) {
+						trace("Not valid file.");
+					}
 					//					trace( "제목 :", song.title );
 					//					trace( "크기 :", song.size );
 					//					trace( "링크 :", song.link );
